@@ -1,32 +1,30 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import Login from './components/Login';
-
-// Import the background image
+import ErrorPage from './ErrorPage';
 import backgroundImage from './assets/images/background.png';
 
 function App() {
-  const [objectFitStyle, setObjectFitStyle] = useState('cover');
-  const [objectPositionStyle, setObjectPositionStyle] = useState('center');
+  const [objectFitStyle, setObjectFitStyle] = useState('cover'); // State for image fit style
+  const [objectPositionStyle, setObjectPositionStyle] = useState('center'); // State for image position style
+  const location = useLocation(); // Get the current route location
 
   useEffect(() => {
-    // Function to check screen width and apply appropriate styles
+    // Function to update background image styles based on screen size
     const updateStyles = () => {
       if (window.innerWidth <= 768) {
-        setObjectFitStyle('contain');  // Small screens use 'contain'
-        setObjectPositionStyle('center');  // Center the image on small screens
+        setObjectFitStyle('contain'); // For small screens, use 'contain'
+        setObjectPositionStyle('center'); // Center the image on small screens
       } else {
-        setObjectFitStyle('contain');    // Large screens use 'cover'
-        setObjectPositionStyle('top'); // Start from the top on large screens
+        setObjectFitStyle('contain'); // For larger screens, also use 'contain'
+        setObjectPositionStyle('center'); // Keep the image centered
       }
     };
 
-    // Initial check
-    updateStyles();
+    updateStyles(); // Initial style update
+    window.addEventListener('resize', updateStyles); // Listen for window resize events
 
-    // Add event listener for window resize
-    window.addEventListener('resize', updateStyles);
-
-    // Clean up the event listener on unmount
+    // Clean up the event listener on component unmount
     return () => {
       window.removeEventListener('resize', updateStyles);
     };
@@ -34,29 +32,39 @@ function App() {
 
   return (
     <div className="App" style={{ position: "relative", height: "100vh", width: "100%" }}>
-      
-      {/* Background Image with Blur */}
-      <img
-        src={backgroundImage}
-        alt="Background"
-        style={{
-          position: "absolute",
-          top: "10px",
-          left: 0,
-          width: "100%",
-          height: "100%",
-          objectFit: objectFitStyle, // Dynamic objectFit based on screen size
-          objectPosition: objectPositionStyle, // Dynamic objectPosition based on screen size
-          filter: "blur(5px)", // Add blur effect
-          zIndex: -1,
-        }}
-      />
-
-      {/* Login Form */}
-      <Login />
-      
+      {/* Conditionally render background image only if it's not the error page */}
+      {location.pathname !== '/error' && (
+        <img
+          src={backgroundImage} // Background image source
+          alt="Background"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: objectFitStyle, // Apply fit style based on state
+            objectPosition: objectPositionStyle, // Apply position style based on state
+            filter: "blur(5px)", // Add a blur effect to the background
+            zIndex: -1, // Ensure the background is behind other content
+          }}
+        />
+      )}
+      {/* Define routes for different components */}
+      <Routes>
+        <Route path="/" element={<Login style={{ marginTop: '100px' }} />} /> {/* Route for Login component */}
+        <Route path="/error" element={<ErrorPage />} /> {/* Route for ErrorPage component */}
+      </Routes>
     </div>
   );
 }
 
-export default App;
+function AppWrapper() {
+  return (
+    <Router>
+      <App />
+    </Router>
+  );
+}
+
+export default AppWrapper;
